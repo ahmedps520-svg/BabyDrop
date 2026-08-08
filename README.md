@@ -18,36 +18,30 @@ Both live at the top of the `<script>` block in `index.html`, under `1. CONFIG`.
 var PANIC_PHONE = '0568005010';
 ```
 
-**2. Firebase Realtime Database** (project: **Babydrop**, Spark plan) — this is what makes
-claims sync live between everyone's phones instead of staying in one browser.
+**2. Firebase Realtime Database** — already wired in. Project **Babydrop** (`babydrop-57614`),
+Spark plan, database in Singapore (`asia-southeast1`). Claims sync live between everyone's
+phones through it.
 
-To get the config again: Firebase Console -> gear icon -> **Project settings** -> **General**
-tab -> scroll to **Your apps** -> pick the Web app -> **SDK setup and configuration** ->
-select **Config**. Copy the whole `firebaseConfig` object into `index.html`. If no Web app is
-listed there yet, click **Add app** and choose the Web (`</>`) icon first — a Realtime
-Database on its own does not create one.
+The `apiKey` in `index.html` is not a secret — a Firebase web API key identifies the project
+and is designed to ship in client code. Access is governed entirely by the database rules:
 
-```js
-var FIREBASE_CONFIG = { apiKey: 'PASTE_API_KEY', ... };
+```json
+{ "rules": { "reservations": { ".read": true, ".write": true } } }
 ```
 
-Two gotchas specific to this project:
+`DB_PATH` is therefore `reservations/claims-v1`. Move it outside `reservations` and every
+claim is denied and silently fails to save.
 
-- **The database is in Singapore (asia-southeast1)**, so `databaseURL` is the regional form
-  `https://<project>-default-rtdb.asia-southeast1.firebasedatabase.app` — *not* the default
-  `...-default-rtdb.firebaseio.com`. The config panel usually shows the right one, but if in
-  doubt copy it from Realtime Database -> **Data**, where it is printed above the tree.
-- **The rules only allow the `reservations` path:**
+Because those rules are open, anyone who finds the database URL can read or overwrite the
+claims. That is a reasonable trade for a family registry with no sign-in, but it is why the
+path is versioned — bump `claims-v1` to `claims-v2` to start over if the data is ever messed
+with.
 
-  ```json
-  { "rules": { "reservations": { ".read": true, ".write": true } } }
-  ```
+If live sync ever fails, the page still renders and falls back to this-device-only storage,
+showing a small banner.
 
-  So `DB_PATH` is set to `reservations/claims-v1`. If you move it outside `reservations`,
-  every claim is denied and nothing saves.
-
-Until the config is filled in the page still works perfectly — it just falls back to
-this-device-only storage and shows a small banner saying live sync is off.
+To re-fetch the config: Console -> gear -> **Project settings** -> **General** -> **Your apps**
+-> Web app -> **SDK setup and configuration** -> **Config**.
 
 ## Adding gifts
 

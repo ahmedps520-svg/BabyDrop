@@ -979,21 +979,22 @@ body.sheet-open .card.settled{animation-play-state:paused;}
 /* Phone number the floating Panic Button dials. */
 var PANIC_PHONE = '0568005010';
 
-/* Firebase Realtime Database (free Spark plan).
+/* Firebase Realtime Database — project "Babydrop" (free Spark plan).
    Console -> Project settings -> Your apps -> Web app -> SDK setup.
-   Until these are real values the page still works perfectly —
-   it just falls back to this-device-only storage. */
+   A Firebase web apiKey is not a secret; it identifies the project and is
+   meant to ship in client code. Access is controlled by the database rules.
+
+   Note the databaseURL: this database is in Singapore (asia-southeast1), so
+   it is the REGIONAL '...firebasedatabase.app' host, not the default
+   '...-default-rtdb.firebaseio.com'. */
 var FIREBASE_CONFIG = {
-  apiKey:      'PASTE_API_KEY',
-  authDomain:  'PASTE_PROJECT.firebaseapp.com',
-  /* This database lives in Singapore (asia-southeast1), so the URL is the
-     REGIONAL form below — not the default '...-default-rtdb.firebaseio.com'.
-     Copy it verbatim from Realtime Database -> Data (shown above the tree). */
-  databaseURL: 'https://PASTE_PROJECT-default-rtdb.asia-southeast1.firebasedatabase.app',
-  projectId:   'PASTE_PROJECT',
-  storageBucket:'PASTE_PROJECT.appspot.com',
-  messagingSenderId:'PASTE_SENDER_ID',
-  appId:       'PASTE_APP_ID'
+  apiKey:            'AIzaSyDsXER_O6ET7DdPgHPoIC3UIBGwl0K9HYo',
+  authDomain:        'babydrop-57614.firebaseapp.com',
+  databaseURL:       'https://babydrop-57614-default-rtdb.asia-southeast1.firebasedatabase.app',
+  projectId:         'babydrop-57614',
+  storageBucket:     'babydrop-57614.firebasestorage.app',
+  messagingSenderId: '315900752515',
+  appId:             '1:315900752515:web:77eefd4d462b2fc80661b6'
 };
 
 /* Where claims live in the database.
