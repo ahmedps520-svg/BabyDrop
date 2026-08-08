@@ -48,3 +48,9 @@ To re-fetch the config: Console -> gear -> **Project settings** -> **General** -
 Append to the `ITEMS` array (`2. PRODUCTS`). Each entry needs `id`, `name`, `subtitle`,
 `price`, `link`, and `image` (a base64 data URI — retailer image URLs mostly block
 hotlinking). Everything else wires up automatically.
+
+## Link preview
+
+`preview.png` is the image WhatsApp/iMessage show when the link is shared, wired up via the
+Open Graph tags in `<head>`. It is just a 1200x630 screenshot of the page itself, so if the
+design changes noticeably, regenerate it and re-commit.
