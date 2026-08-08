@@ -43,6 +43,14 @@ showing a small banner.
 To re-fetch the config: Console -> gear -> **Project settings** -> **General** -> **Your apps**
 -> Web app -> **SDK setup and configuration** -> **Config**.
 
+## Language
+
+The page asks Arabic or English on the first visit and remembers the choice in
+`localStorage` (`asma-registry-lang-v1`). The globe chip under the progress bar switches it
+later. All interface text lives in the `STRINGS` table near the top of the script — product
+names and subtitles stay Arabic in both modes, since those are the products' actual names.
+Choosing Arabic flips the whole document to RTL.
+
 ## Adding gifts
 
 Append to the `ITEMS` array (`2. PRODUCTS`). Each entry needs `id`, `name`, `subtitle`,
@@ -54,3 +62,6 @@ hotlinking). Everything else wires up automatically.
 `preview.png` is the image WhatsApp/iMessage show when the link is shared, wired up via the
 Open Graph tags in `<head>`. It is just a 1200x630 screenshot of the page itself, so if the
 design changes noticeably, regenerate it and re-commit.
+
+Regenerate `preview.png` with a language already stored, otherwise the language gate covers
+the shot.
