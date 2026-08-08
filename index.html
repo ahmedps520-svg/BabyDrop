@@ -7,6 +7,16 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Asma's Baby Boy — Gift Registry</title>
+<meta name="description" content="Pick a gift for Asma's baby boy and tap to claim it, so nobody brings the same thing twice.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Asma's Baby Boy">
+<meta property="og:title" content="Asma's Baby Boy — Gift Registry">
+<meta property="og:description" content="Pick a gift and tap to claim it, so nobody brings the same thing twice.">
+<meta property="og:url" content="https://ahmedps520-svg.github.io/BabyDrop/">
+<meta property="og:image" content="https://ahmedps520-svg.github.io/BabyDrop/preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <style>
 /* ============================================================
    TOKENS
@@ -683,7 +693,14 @@ a{color:inherit;}
 @keyframes wave-slide{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 
 /* animated gradient headline */
-.headline{background-size:230% 100%;}
+.headline{
+  background-size:230% 100%;
+  animation:rise .8s var(--ease) .12s forwards, headline-sheen 9s ease-in-out 1s infinite;
+}
+@keyframes headline-sheen{
+  0%,100%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+}
 
 /* ============================================================
    SECTION HEAD + PROGRESS
@@ -873,6 +890,52 @@ body.sheet-open .card.settled{animation-play-state:paused;}
 .foot span{display:inline-block;animation:bob 2.8s ease-in-out infinite;}
 
 /* ============================================================
+   POLISH
+   ============================================================ */
+
+/* keyboard focus, previously invisible */
+a:focus-visible,button:focus-visible,input:focus-visible{
+  outline:3px solid var(--sky-400);
+  outline-offset:3px;
+  border-radius:12px;
+}
+
+/* whole card acknowledges a press */
+.card{transition:box-shadow .3s var(--ease), transform .18s var(--ease);}
+.card.settled:active{transform:scale(.985);}
+
+/* the claim button / claimed badge crossfade when they swap */
+.claim{animation:glow 2.6s ease-in-out infinite, btn-flow 5s ease infinite, slot-in .42s var(--spring) both;}
+@keyframes slot-in{
+  from{opacity:0;transform:translateY(8px) scale(.96);}
+  to{opacity:1;transform:none;}
+}
+
+/* somebody else just claimed this, live */
+.card.just-claimed{animation:remote-pulse 1.5s var(--ease) 2;}
+@keyframes remote-pulse{
+  0%,100%{box-shadow:var(--shadow-sm);}
+  50%{box-shadow:0 0 0 6px rgba(47,191,155,.28), 0 12px 32px rgba(47,191,155,.3);}
+}
+
+/* counter ticks over instead of snapping */
+.track-label b{display:inline-block;transition:transform .3s var(--spring);}
+.track-label b.tick-up{transform:scale(1.45);}
+
+/* sheet follows the finger */
+.sheet.dragging{transition:none;}
+
+/* everything claimed */
+.finale{
+  display:none;
+  margin:2px auto 0;
+  max-width:960px;
+  text-align:center;
+  font-size:15px;font-weight:700;color:#1c7f6b;
+}
+.finale.show{display:block;animation:pop-badge .6s var(--spring) both;}
+
+/* ============================================================
    REDUCED MOTION
    ============================================================ */
 @media (prefers-reduced-motion:reduce){
@@ -888,6 +951,9 @@ body.sheet-open .card.settled{animation-play-state:paused;}
   .sheet{transition:transform .001ms;}
   .bubbles,.hero-icon,.waves,.media::after,.price::after,.claim::after,.ribbon::after,.track-fill::after{display:none;}
   .card.settled{animation:none;}
+  .card.just-claimed{animation:none;}
+  .claim{animation:none;}
+  .headline{animation:rise .001ms forwards;}
   .card.pre-reveal{opacity:1;transform:none;}
   .kicker,.track,.track-label{opacity:1 !important;transform:none !important;}
   .track-fill{transition:width .001ms;}
@@ -918,6 +984,8 @@ body.sheet-open .card.settled{animation-play-state:paused;}
 </section>
 
 <main class="grid" id="grid"></main>
+
+<p class="finale" id="finale">&#127881; Every gift is spoken for &mdash; thank you all!</p>
 
 <p class="foot" id="foot">&nbsp;</p>
 
@@ -1046,6 +1114,7 @@ var ITEMS = [
 /* ============================================================
    3. STATE
    ============================================================ */
+var reduceMotion  = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 var DEFAULT_NAME  = 'A family member';
 var LOCAL_KEY     = 'asma-registry-claims-v1';
 
@@ -1053,6 +1122,31 @@ var claims   = {};      // { itemId: { name, ts } }
 var dbRef    = null;    // firebase ref, or null when offline
 var liveSync = false;   // true once the realtime listener is attached
 var pending  = null;    // { mode:'claim'|'release', id }
+var myActions = {};     // ids this device just acted on, so we don't self-highlight
+
+/* count the claimed total up rather than snapping to it */
+function countTo(el, target){
+  var from = parseInt(el.textContent, 10);
+  if(isNaN(from)) from = 0;
+  if(from === target){ el.textContent = target; return; }
+  if(reduceMotion){ el.textContent = target; return; }
+
+  clearInterval(el._timer);
+  var step = target > from ? 1 : -1;
+  var cur  = from;
+  el._timer = setInterval(function(){
+    cur += step;
+    el.textContent = cur;
+    el.classList.add('tick-up');
+    setTimeout(function(){ el.classList.remove('tick-up'); }, 180);
+    if(cur === target) clearInterval(el._timer);
+  }, 130);
+}
+
+/* a short tap of haptic feedback where the device supports it */
+function buzz(pattern){
+  try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(e){}
+}
 
 function esc(s){
   return String(s).replace(/[&<>"']/g, function(c){
@@ -1207,8 +1301,17 @@ function paint(){
 
   var pct = ITEMS.length ? Math.round((claimedCount / ITEMS.length) * 100) : 0;
   document.getElementById('trackFill').style.width = pct + '%';
-  document.getElementById('trackCount').textContent = claimedCount;
+  countTo(document.getElementById('trackCount'), claimedCount);
   document.getElementById('trackTotal').textContent = ITEMS.length;
+
+  var finale = document.getElementById('finale');
+  var allDone = claimedCount === ITEMS.length && ITEMS.length > 0;
+  if(allDone && !finale.classList.contains('show')){
+    finale.classList.add('show');
+    setTimeout(confettiRain, 120);
+  }else if(!allDone){
+    finale.classList.remove('show');
+  }
   document.getElementById('trackSync').textContent = liveSync ? '\u00b7 syncing live' : '';
   document.getElementById('foot').innerHTML =
     claimedCount === ITEMS.length
@@ -1246,10 +1349,20 @@ function initFirebase(){
     dbRef = firebase.database().ref(DB_PATH);
 
     dbRef.on('value', function(snap){
-      claims   = snap.val() || {};
+      var incoming = snap.val() || {};
+
+      /* anything that became claimed without this device doing it was
+         claimed by someone else — flash the card so it's noticeable */
+      var remote = [];
+      for(var id in incoming){
+        if(incoming[id] && !claims[id] && !myActions[id]) remote.push(id);
+      }
+
+      claims   = incoming;
       liveSync = true;
       saveLocal();            // keep a local mirror for offline reloads
       paint();
+      flashRemote(remote);
     }, function(err){
       liveSync = false;
       dbRef = null;
@@ -1264,6 +1377,18 @@ function initFirebase(){
   }
 }
 initFirebase();
+
+function flashRemote(ids){
+  for(var i = 0; i < ids.length; i++){
+    (function(card){
+      if(!card) return;
+      card.classList.remove('just-claimed');
+      void card.offsetWidth;               // restart the animation
+      card.classList.add('just-claimed');
+      setTimeout(function(){ card.classList.remove('just-claimed'); }, 3200);
+    })(document.getElementById('card-' + ids[i]));
+  }
+}
 
 /* ============================================================
    6. BOTTOM SHEET
@@ -1280,11 +1405,13 @@ function itemById(id){
 }
 
 function openSheet(){
+  buzz(8);
   document.body.classList.add('sheet-open');
   backdrop.classList.add('open');
   sheet.classList.add('open');
 }
 function closeSheet(){
+  sheet.style.transform = '';
   document.body.classList.remove('sheet-open');
   backdrop.classList.remove('open');
   sheet.classList.remove('open');
@@ -1312,6 +1439,35 @@ function openRelease(id){
   openSheet();
 }
 
+/* drag the sheet down to dismiss it, the way iOS sheets behave */
+(function(){
+  var startY = 0, dy = 0, dragging = false;
+
+  sheet.addEventListener('pointerdown', function(e){
+    if(!sheet.classList.contains('open')) return;
+    if(e.target.closest('input, button, a')) return;   // don't hijack the controls
+    dragging = true; startY = e.clientY; dy = 0;
+    sheet.classList.add('dragging');
+    sheet.setPointerCapture(e.pointerId);
+  });
+
+  sheet.addEventListener('pointermove', function(e){
+    if(!dragging) return;
+    dy = Math.max(0, e.clientY - startY);             // downward only
+    sheet.style.transform = 'translateY(' + dy + 'px)';
+  });
+
+  function end(){
+    if(!dragging) return;
+    dragging = false;
+    sheet.classList.remove('dragging');
+    sheet.style.transform = '';
+    if(dy > 90) closeSheet();
+  }
+  sheet.addEventListener('pointerup', end);
+  sheet.addEventListener('pointercancel', end);
+})();
+
 backdrop.addEventListener('click', closeSheet);
 document.getElementById('claimCancel').addEventListener('click', closeSheet);
 document.getElementById('releaseCancel').addEventListener('click', closeSheet);
@@ -1330,6 +1486,7 @@ document.getElementById('claimConfirm').addEventListener('click', function(){
   var id  = pending.id;
   var who = (nameInput.value || '').trim().slice(0, 40) || DEFAULT_NAME;
   var btn = document.getElementById('slot-' + id);
+  myActions[id] = true;
   closeSheet();
 
   if(dbRef){
@@ -1348,6 +1505,7 @@ document.getElementById('claimConfirm').addEventListener('click', function(){
         return;
       }
       celebrate(btn);
+      buzz([12, 40, 18]);
       toast('Thank you, ' + who + '!', true);
     });
   }else{
@@ -1355,12 +1513,14 @@ document.getElementById('claimConfirm').addEventListener('click', function(){
     saveLocal();
     paint();
     celebrate(btn);
+    buzz([12, 40, 18]);
   }
 });
 
 document.getElementById('releaseConfirm').addEventListener('click', function(){
   if(!pending || pending.mode !== 'release') return;
   var id = pending.id;
+  myActions[id] = true;
   closeSheet();
 
   if(dbRef){
@@ -1377,8 +1537,6 @@ document.getElementById('releaseConfirm').addEventListener('click', function(){
 /* ============================================================
    8. RIPPLE + SPARKLES
    ============================================================ */
-var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
 document.addEventListener('pointerdown', function(e){
   var btn = e.target.closest ? e.target.closest('.claim, .btn-solid') : null;
   if(!btn || reduceMotion) return;
