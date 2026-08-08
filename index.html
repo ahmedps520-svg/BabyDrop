@@ -594,17 +594,26 @@ a{color:inherit;}
 /* ============================================================
    PANIC BUTTON
    ============================================================ */
-.panic{
+.panic-wrap{
   position:fixed;
   z-index:70;
-  inset-inline-end:calc(var(--sar) + 18px);
-  bottom:calc(var(--sab) + 20px);
-  width:66px;
-  height:66px;
+  /* physical right: a FAB stays bottom-right in Arabic too */
+  right:calc(var(--sar) + 18px);
+  bottom:calc(var(--sab) + 18px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:7px;
+  pointer-events:none;
+}
+.panic{
+  position:relative;
+  pointer-events:auto;
+  width:62px;
+  height:62px;
   border-radius:50%;
   display:grid;
   place-items:center;
-  gap:1px;
   text-decoration:none;
   color:#fff;
   background:linear-gradient(140deg,#ff6b6f,#e5383b);
@@ -625,13 +634,22 @@ a{color:inherit;}
   0%{transform:scale(1);opacity:.75;}
   100%{transform:scale(1.75);opacity:0;}
 }
-.panic svg{width:23px;height:23px;display:block;}
-.panic .panic-text{
-  font-size:8px;
-  font-weight:800;
-  letter-spacing:.04em;
-  text-transform:uppercase;
-  line-height:1;
+.panic svg{width:26px;height:26px;display:block;}
+.panic-label{
+  pointer-events:none;
+  padding:5px 11px;
+  border-radius:var(--r-pill);
+  background:rgba(255,255,255,.94);
+  -webkit-backdrop-filter:saturate(180%) blur(12px);
+  backdrop-filter:saturate(180%) blur(12px);
+  border:1px solid rgba(229,56,59,.22);
+  box-shadow:0 4px 12px rgba(21,86,143,.14);
+  color:var(--coral-dark);
+  font-size:11.5px;
+  font-weight:700;
+  letter-spacing:-.01em;
+  line-height:1.2;
+  white-space:nowrap;
 }
 
 /* ============================================================
@@ -890,6 +908,117 @@ body.sheet-open .card.settled{animation-play-state:paused;}
 .foot span{display:inline-block;animation:bob 2.8s ease-in-out infinite;}
 
 /* ============================================================
+   LANGUAGE GATE
+   ============================================================ */
+.gate{
+  position:fixed;
+  inset:0;
+  z-index:120;
+  display:none;
+  place-items:center;
+  padding:24px;
+  background:linear-gradient(168deg,#eaf6ff 0%,#dcefff 45%,#f4faff 100%);
+}
+.gate.show{display:grid;}
+.gate-card{
+  width:100%;
+  max-width:400px;
+  padding:32px 24px 26px;
+  border-radius:26px;
+  background:#fff;
+  border:1px solid var(--line);
+  box-shadow:var(--shadow-lg);
+  text-align:center;
+  animation:pop-in .55s var(--spring) both;
+}
+.gate-emoji{font-size:42px;line-height:1;display:block;margin-bottom:14px;animation:bob 2.6s ease-in-out infinite;}
+.gate-card h2{
+  margin:0 0 4px;
+  font-size:22px;font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(105deg,#2176c4,#5bb0ee 50%,#7fd0e8);
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;-webkit-text-fill-color:transparent;
+  padding-bottom:.06em;
+}
+.gate-card p{margin:0 0 22px;font-size:14px;color:var(--ink-soft);}
+.gate-actions{display:flex;flex-direction:column;gap:11px;}
+.gate-actions button{
+  min-height:58px;
+  border-radius:16px;
+  font-size:17px;
+  font-weight:700;
+  letter-spacing:-.01em;
+  transition:transform .16s var(--ease);
+}
+.gate-actions button:active{transform:scale(.975);}
+.gate-ar{
+  background:linear-gradient(135deg,var(--sky-500),var(--sky-400));
+  color:#fff;
+  box-shadow:0 6px 18px rgba(59,149,224,.3);
+}
+.gate-en{
+  background:#f1f6fb;
+  color:var(--ink);
+  border:1.5px solid var(--sky-200);
+}
+
+/* ============================================================
+   SHARE + LANGUAGE CHIPS
+   ============================================================ */
+.chips{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:14px;
+  opacity:0;
+  animation:rise .7s var(--ease) .54s forwards;
+}
+.chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:48px;
+  padding:0 16px;
+  border-radius:var(--r-pill);
+  background:#fff;
+  border:1.5px solid var(--sky-200);
+  color:var(--sky-600);
+  font-size:14px;
+  font-weight:600;
+  box-shadow:var(--shadow-sm);
+  transition:transform .16s var(--ease), background .2s var(--ease);
+}
+.chip:active{transform:scale(.96);background:var(--sky-50);}
+.chip svg{width:16px;height:16px;flex:0 0 auto;}
+
+/* ---- toast gets an action button (Undo) ---- */
+.toast-action{
+  flex:0 0 auto;
+  min-height:40px;
+  padding:0 14px;
+  border-radius:12px;
+  background:var(--sky-500);
+  color:#fff;
+  font-size:13.5px;
+  font-weight:700;
+  box-shadow:0 4px 12px rgba(59,149,224,.3);
+  transition:transform .16s var(--ease);
+}
+.toast-action:active{transform:scale(.95);}
+#toastText{flex:1 1 auto;}
+
+/* ============================================================
+   RTL CORRECTIONS (Arabic mode)
+   ============================================================ */
+html[dir="rtl"] .price{align-self:flex-start;}
+html[dir="rtl"] .ribbon{transform:rotate(45deg) scale(.6);}
+html[dir="rtl"] .card.is-claimed .ribbon{transform:rotate(45deg) scale(1);}
+html[dir="rtl"] .claimed-box{padding:8px 14px 8px 12px;}
+html[dir="rtl"] .headline,
+html[dir="rtl"] .eyebrow{text-align:right;}
+
+/* ============================================================
    POLISH
    ============================================================ */
 
@@ -955,12 +1084,25 @@ a:focus-visible,button:focus-visible,input:focus-visible{
   .claim{animation:none;}
   .headline{animation:rise .001ms forwards;}
   .card.pre-reveal{opacity:1;transform:none;}
-  .kicker,.track,.track-label{opacity:1 !important;transform:none !important;}
+  .kicker,.track,.track-label,.chips{opacity:1 !important;transform:none !important;}
+  .gate-emoji{animation:none;}
   .track-fill{transition:width .001ms;}
 }
 </style>
 </head>
 <body>
+
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-label="Choose language">
+  <div class="gate-card">
+    <span class="gate-emoji" aria-hidden="true">&#128118;</span>
+    <h2>Asma's Baby Boy</h2>
+    <p>&#1575;&#1582;&#1578;&#1575;&#1585;&#1610; &#1575;&#1604;&#1604;&#1594;&#1577; &nbsp;&middot;&nbsp; Choose your language</p>
+    <div class="gate-actions">
+      <button class="gate-ar" type="button" id="gateAr">&#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</button>
+      <button class="gate-en" type="button" id="gateEn">English</button>
+    </div>
+  </div>
+</div>
 
 <div class="bubbles" id="bubbles" aria-hidden="true"></div>
 
@@ -969,8 +1111,8 @@ a:focus-visible,button:focus-visible,input:focus-visible{
   <div class="blob blob-b" aria-hidden="true"></div>
   <div class="blob blob-c" aria-hidden="true"></div>
   <div id="heroIcons" aria-hidden="true"></div>
-  <p class="eyebrow">Baby Shower Registry</p>
-  <h1 class="headline">Asma's<br>Baby Boy</h1>
+  <p class="eyebrow" id="eyebrow"></p>
+  <h1 class="headline" id="headline"></h1>
   <div class="waves" aria-hidden="true">
     <svg class="wave-1" viewBox="0 0 1200 56" preserveAspectRatio="none"><path d="M0 30 C150 6 300 54 600 30 C900 6 1050 54 1200 30 L1200 56 L0 56 Z M1200 30 C1350 6 1500 54 1800 30 C2100 6 2250 54 2400 30 L2400 56 L1200 56 Z"/></svg>
     <svg class="wave-2" viewBox="0 0 1200 56" preserveAspectRatio="none"><path d="M0 40 C200 20 340 58 600 40 C860 22 1000 58 1200 40 L1200 56 L0 56 Z M1200 40 C1400 20 1540 58 1800 40 C2060 22 2200 58 2400 40 L2400 56 L1200 56 Z"/></svg>
@@ -978,14 +1120,26 @@ a:focus-visible,button:focus-visible,input:focus-visible{
 </header>
 
 <section class="section-head">
-  <p class="kicker"><i>&#127872;</i> Tap a gift to claim it <i>&#127868;</i></p>
+  <p class="kicker" id="kicker"></p>
   <div class="track"><div class="track-fill" id="trackFill"></div></div>
-  <p class="track-label"><b id="trackCount">0</b> of <b id="trackTotal">0</b> gifts claimed <span id="trackSync"></span></p>
+  <p class="track-label"><span id="trackText"></span> <span id="trackSync"></span></p>
+  <div class="chips">
+    <button class="chip" type="button" id="shareBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
+      </svg><span id="shareLabel"></span>
+    </button>
+    <button class="chip" type="button" id="langBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/>
+      </svg><span id="langLabel"></span>
+    </button>
+  </div>
 </section>
 
 <main class="grid" id="grid"></main>
 
-<p class="finale" id="finale">&#127881; Every gift is spoken for &mdash; thank you all!</p>
+<p class="finale" id="finale"></p>
 
 <p class="foot" id="foot">&nbsp;</p>
 
@@ -996,15 +1150,18 @@ a:focus-visible,button:focus-visible,input:focus-visible{
 <div class="toast" id="toast" role="status" aria-live="polite">
   <span class="dot"></span>
   <span id="toastText"></span>
+  <button class="toast-action" type="button" id="toastAction" hidden></button>
 </div>
 
 <!-- panic button -->
-<a class="panic" id="panicBtn" href="#" aria-label="Panic Button — call for help">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.35 1.9.66 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.31 1.85.53 2.81.66A2 2 0 0 1 22 16.92z"/>
-  </svg>
-  <span class="panic-text">Panic</span>
-</a>
+<div class="panic-wrap">
+  <a class="panic" id="panicBtn" href="#">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.35 1.9.66 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.31 1.85.53 2.81.66A2 2 0 0 1 22 16.92z"/>
+    </svg>
+  </a>
+  <span class="panic-label" id="panicLabel"></span>
+</div>
 
 <!-- ============ BOTTOM SHEET ============ -->
 <div class="backdrop" id="backdrop"></div>
@@ -1014,23 +1171,23 @@ a:focus-visible,button:focus-visible,input:focus-visible{
 
   <!-- claim view -->
   <div id="claimView">
-    <h2 id="sheetTitle">Claim this gift</h2>
+    <h2 id="sheetTitle"></h2>
     <p class="sheet-sub" id="claimItemName" lang="ar" dir="rtl"></p>
-    <label for="claimName">Your name (optional)</label>
-    <input id="claimName" type="text" autocomplete="name" enterkeyhint="done" placeholder="A family member">
+    <label for="claimName" id="claimNameLabel"></label>
+    <input id="claimName" type="text" autocomplete="name" enterkeyhint="done">
     <div class="sheet-actions">
-      <button class="btn-ghost" type="button" id="claimCancel">Cancel</button>
-      <button class="btn-solid" type="button" id="claimConfirm">Confirm</button>
+      <button class="btn-ghost" type="button" id="claimCancel"></button>
+      <button class="btn-solid" type="button" id="claimConfirm"></button>
     </div>
   </div>
 
   <!-- release view -->
   <div id="releaseView" hidden>
-    <h2>Release this gift?</h2>
+    <h2 id="releaseTitle"></h2>
     <p class="sheet-sub" id="releaseItemName" lang="ar" dir="rtl"></p>
     <div class="sheet-actions">
-      <button class="btn-ghost" type="button" id="releaseCancel">Keep it</button>
-      <button class="btn-danger" type="button" id="releaseConfirm">Release</button>
+      <button class="btn-ghost" type="button" id="releaseCancel"></button>
+      <button class="btn-danger" type="button" id="releaseConfirm"></button>
     </div>
   </div>
 </div>
@@ -1111,11 +1268,132 @@ var ITEMS = [
   }
 ];
 
+
 /* ============================================================
-   3. STATE
+   3. LANGUAGE
+   ============================================================ */
+var LANG_KEY = 'asma-registry-lang-v1';
+var LANG = 'en';
+
+var STRINGS = {
+  en: {
+    eyebrow:    'Baby Shower Registry',
+    headline:   "Asma's<br>Baby Boy",
+    kicker:     '<i>\ud83c\udf80</i> Tap a gift to claim it <i>\ud83c\udf7c</i>',
+    trackText:  '<b id="trackCount">0</b> of <b id="trackTotal">0</b> gifts claimed',
+    syncing:    '\u00b7 syncing live',
+    share:      'Share',
+    langSwitch: '\u0627\u0644\u0639\u0631\u0628\u064a\u0629',
+    foot:       '<span>\ud83d\udc99</span> Made with love for Asma\u2019s little one',
+    finale:     '\ud83c\udf89 Every gift is spoken for \u2014 thank you all!',
+    shop:       'View in shop',
+    claim:      "I'll bring this",
+    reserved:   'Reserved',
+    claimed:    'Claimed',
+    release:    'Release',
+    sheetClaim: 'Claim this gift',
+    nameLabel:  'Your name (optional)',
+    namePh:     'A family member',
+    cancel:     'Cancel',
+    confirm:    'Confirm',
+    sheetRel:   'Release this gift?',
+    keepIt:     'Keep it',
+    defaultName:'A family member',
+    panic:      'Panic Button',
+    thanks:     'Thank you, {name}!',
+    tooLate:    'Too late \u2014 {name} just claimed that one.',
+    someoneElse:'someone else',
+    errClaim:   'Could not save that claim \u2014 please try again.',
+    errRelease: 'Could not release that gift \u2014 please try again.',
+    released:   'Released.',
+    undo:       'Undo',
+    undoGone:   'Too late to undo \u2014 someone else took it.',
+    syncOff:    'Live sync is off \u2014 claims are saved on this device only.',
+    syncErr:    'Live sync unavailable ({code}) \u2014 claims are saved on this device only.',
+    copied:     'Link copied!'
+  },
+  ar: {
+    eyebrow:    '\u0642\u0627\u0626\u0645\u0629 \u0647\u062f\u0627\u064a\u0627 \u0627\u0644\u0645\u0648\u0644\u0648\u062f',
+    headline:   '\u0645\u0648\u0644\u0648\u062f<br>\u0623\u0633\u0645\u0627\u0621',
+    kicker:     '<i>\ud83c\udf80</i> \u0627\u062e\u062a\u0627\u0631\u064a \u0647\u062f\u064a\u0629 \u0648\u0627\u0636\u063a\u0637\u064a \u0644\u062d\u062c\u0632\u0647\u0627 <i>\ud83c\udf7c</i>',
+    trackText:  '\u062a\u0645 \u062d\u062c\u0632 <b id="trackCount">0</b> \u0645\u0646 <b id="trackTotal">0</b> \u0647\u062f\u0627\u064a\u0627',
+    syncing:    '\u00b7 \u0645\u0632\u0627\u0645\u0646\u0629 \u0645\u0628\u0627\u0634\u0631\u0629',
+    share:      '\u0645\u0634\u0627\u0631\u0643\u0629',
+    langSwitch: 'English',
+    foot:       '<span>\ud83d\udc99</span> \u0635\u064f\u0646\u0639 \u0628\u062d\u0628 \u0644\u0645\u0648\u0644\u0648\u062f \u0623\u0633\u0645\u0627\u0621',
+    finale:     '\ud83c\udf89 \u062a\u0645 \u062d\u062c\u0632 \u062c\u0645\u064a\u0639 \u0627\u0644\u0647\u062f\u0627\u064a\u0627 \u2014 \u0634\u0643\u0631\u0627\u064b \u0644\u0643\u0645!',
+    shop:       '\u0639\u0631\u0636 \u0641\u064a \u0627\u0644\u0645\u062a\u062c\u0631',
+    claim:      '\u0633\u0623\u062d\u0636\u0631 \u0647\u0630\u0647',
+    reserved:   '\u0645\u062d\u062c\u0648\u0632\u0629',
+    claimed:    '\u0645\u062d\u062c\u0648\u0632\u0629',
+    release:    '\u0625\u0644\u063a\u0627\u0621',
+    sheetClaim: '\u062d\u062c\u0632 \u0647\u0630\u0647 \u0627\u0644\u0647\u062f\u064a\u0629',
+    nameLabel:  '\u0627\u0633\u0645\u0643 (\u0627\u062e\u062a\u064a\u0627\u0631\u064a)',
+    namePh:     '\u0623\u062d\u062f \u0623\u0641\u0631\u0627\u062f \u0627\u0644\u0639\u0627\u0626\u0644\u0629',
+    cancel:     '\u0625\u0644\u063a\u0627\u0621',
+    confirm:    '\u062a\u0623\u0643\u064a\u062f',
+    sheetRel:   '\u0625\u0644\u063a\u0627\u0621 \u062d\u062c\u0632 \u0647\u0630\u0647 \u0627\u0644\u0647\u062f\u064a\u0629\u061f',
+    keepIt:     '\u0627\u062d\u062a\u0641\u0638\u064a \u0628\u0647\u0627',
+    defaultName:'\u0623\u062d\u062f \u0623\u0641\u0631\u0627\u062f \u0627\u0644\u0639\u0627\u0626\u0644\u0629',
+    panic:      '\u0632\u0631 \u0627\u0644\u0637\u0648\u0627\u0631\u0626',
+    thanks:     '\u0634\u0643\u0631\u0627\u064b \u0644\u0643\u060c {name}!',
+    tooLate:    '\u0633\u0628\u0642\u0643 {name} \u0625\u0644\u0649 \u062d\u062c\u0632\u0647\u0627.',
+    someoneElse:'\u0634\u062e\u0635 \u0622\u062e\u0631',
+    errClaim:   '\u062a\u0639\u0630\u0631 \u062d\u0641\u0638 \u0627\u0644\u062d\u062c\u0632 \u2014 \u062d\u0627\u0648\u0644\u064a \u0645\u0631\u0629 \u0623\u062e\u0631\u0649.',
+    errRelease: '\u062a\u0639\u0630\u0631 \u0625\u0644\u063a\u0627\u0621 \u0627\u0644\u062d\u062c\u0632 \u2014 \u062d\u0627\u0648\u0644\u064a \u0645\u0631\u0629 \u0623\u062e\u0631\u0649.',
+    released:   '\u062a\u0645 \u0625\u0644\u063a\u0627\u0621 \u0627\u0644\u062d\u062c\u0632.',
+    undo:       '\u062a\u0631\u0627\u062c\u0639',
+    undoGone:   '\u0644\u0645 \u064a\u0639\u062f \u0628\u0627\u0644\u0625\u0645\u0643\u0627\u0646 \u0627\u0644\u062a\u0631\u0627\u062c\u0639 \u2014 \u062d\u062c\u0632\u0647\u0627 \u0634\u062e\u0635 \u0622\u062e\u0631.',
+    syncOff:    '\u0627\u0644\u0645\u0632\u0627\u0645\u0646\u0629 \u0627\u0644\u0645\u0628\u0627\u0634\u0631\u0629 \u0645\u062a\u0648\u0642\u0641\u0629 \u2014 \u0627\u0644\u062d\u062c\u0648\u0632\u0627\u062a \u0645\u062d\u0641\u0648\u0638\u0629 \u0639\u0644\u0649 \u0647\u0630\u0627 \u0627\u0644\u062c\u0647\u0627\u0632 \u0641\u0642\u0637.',
+    syncErr:    '\u062a\u0639\u0630\u0631\u062a \u0627\u0644\u0645\u0632\u0627\u0645\u0646\u0629 ({code}) \u2014 \u0627\u0644\u062d\u062c\u0648\u0632\u0627\u062a \u0645\u062d\u0641\u0648\u0638\u0629 \u0639\u0644\u0649 \u0647\u0630\u0627 \u0627\u0644\u062c\u0647\u0627\u0632 \u0641\u0642\u0637.',
+    copied:     '\u062a\u0645 \u0646\u0633\u062e \u0627\u0644\u0631\u0627\u0628\u0637!'
+  }
+};
+
+function t(key, vars){
+  var str = (STRINGS[LANG] && STRINGS[LANG][key]) || STRINGS.en[key] || '';
+  if(vars){
+    for(var k in vars){ str = str.replace('{' + k + '}', vars[k]); }
+  }
+  return str;
+}
+
+/* paint every fixed label in the chosen language */
+function applyStatic(){
+  document.getElementById('eyebrow').textContent    = t('eyebrow');
+  document.getElementById('headline').innerHTML     = t('headline');
+  document.getElementById('kicker').innerHTML       = t('kicker');
+  document.getElementById('trackText').innerHTML    = t('trackText');
+  document.getElementById('shareLabel').textContent = t('share');
+  document.getElementById('langLabel').textContent  = t('langSwitch');
+  document.getElementById('finale').innerHTML       = t('finale');
+  document.getElementById('sheetTitle').textContent = t('sheetClaim');
+  document.getElementById('claimNameLabel').textContent = t('nameLabel');
+  document.getElementById('claimName').placeholder  = t('namePh');
+  document.getElementById('claimCancel').textContent  = t('cancel');
+  document.getElementById('claimConfirm').textContent = t('confirm');
+  document.getElementById('releaseTitle').textContent = t('sheetRel');
+  document.getElementById('releaseCancel').textContent = t('keepIt');
+  document.getElementById('releaseConfirm').textContent = t('release');
+
+  var pl = document.getElementById('panicLabel');
+  pl.textContent = t('panic');
+  document.getElementById('panicBtn').setAttribute('aria-label', t('panic'));
+}
+
+function setLang(lang, skipRender){
+  LANG = (lang === 'ar') ? 'ar' : 'en';
+  try{ localStorage.setItem(LANG_KEY, LANG); }catch(e){}
+  document.documentElement.lang = LANG;
+  document.documentElement.dir  = (LANG === 'ar') ? 'rtl' : 'ltr';
+  applyStatic();
+  if(!skipRender){ buildCards(); paint(); }
+}
+
+/* ============================================================
+   4. STATE
    ============================================================ */
 var reduceMotion  = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-var DEFAULT_NAME  = 'A family member';
 var LOCAL_KEY     = 'asma-registry-claims-v1';
 
 var claims   = {};      // { itemId: { name, ts } }
@@ -1166,7 +1444,7 @@ function saveLocal(){
 }
 
 /* ============================================================
-   4. RENDER — runs immediately, never waits on the database
+   5. RENDER — runs immediately, never waits on the database
    ============================================================ */
 var grid = document.getElementById('grid');
 
@@ -1184,7 +1462,7 @@ function buildCards(){
     html +=
       '<article class="card" id="card-' + it.id + '" style="' + deco + '">' +
         '<div class="media" id="media-' + it.id + '">' +
-          '<span class="ribbon">Reserved</span>' +
+          '<span class="ribbon">' + esc(t('reserved')) + '</span>' +
           '<img src="' + it.image + '" alt="' + esc(it.name) + '" loading="lazy" decoding="async" ' +
                'onload="onImgSettled(\'' + it.id + '\')" onerror="onImgSettled(\'' + it.id + '\')">' +
         '</div>' +
@@ -1196,7 +1474,7 @@ function buildCards(){
             '<a class="shop" id="shop-' + it.id + '" href="' + esc(it.link) + '" target="_blank" rel="noopener noreferrer">' +
               '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
                 '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>' +
-              '</svg>View in shop</a>' +
+              '</svg>' + esc(t('shop')) + '</a>' +
             '<div id="slot-' + it.id + '"></div>' +
           '</div>' +
         '</div>' +
@@ -1279,22 +1557,22 @@ function paint(){
       var next =
         '<div class="claimed-box">' +
           '<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>' +
-          '<span class="claimed-label">' + esc(rec.name) + '<span>Claimed</span></span>' +
-          '<button class="release" type="button" onclick="openRelease(\'' + it.id + '\')">Release</button>' +
+          '<span class="claimed-label">' + esc(rec.name) + '<span>' + esc(t('claimed')) + '</span></span>' +
+          '<button class="release" type="button" onclick="openRelease(\'' + it.id + '\')">' + esc(t('release')) + '</button>' +
         '</div>';
-      if(slot.dataset.state !== 'claimed:' + rec.name){
+      if(slot.dataset.state !== 'claimed:' + LANG + ':' + rec.name){
         slot.innerHTML = next;
-        slot.dataset.state = 'claimed:' + rec.name;
+        slot.dataset.state = 'claimed:' + LANG + ':' + rec.name;
       }
     }else{
       card.classList.remove('is-claimed');
       shop.classList.remove('disabled');
       shop.removeAttribute('aria-disabled');
       shop.removeAttribute('tabindex');
-      if(slot.dataset.state !== 'open'){
+      if(slot.dataset.state !== 'open:' + LANG){
         slot.innerHTML =
-          '<button class="claim" type="button" onclick="openClaim(\'' + it.id + '\')">I\'ll bring this</button>';
-        slot.dataset.state = 'open';
+          '<button class="claim" type="button" onclick="openClaim(\'' + it.id + '\')">' + esc(t('claim')) + '</button>';
+        slot.dataset.state = 'open:' + LANG;
       }
     }
   }
@@ -1312,28 +1590,61 @@ function paint(){
   }else if(!allDone){
     finale.classList.remove('show');
   }
-  document.getElementById('trackSync').textContent = liveSync ? '\u00b7 syncing live' : '';
-  document.getElementById('foot').innerHTML =
-    claimedCount === ITEMS.length
-      ? '<span>\ud83c\udf89</span> Every gift is spoken for \u2014 thank you!'
-      : '<span>\ud83d\udc99</span> Made with love for Asma\u2019s little one';
+  document.getElementById('trackSync').textContent = liveSync ? t('syncing') : '';
+  document.getElementById('foot').innerHTML = t('foot');
 }
+
+/* ------------------------------------------------------------
+   Language gate: ask on the first visit, remember the answer.
+   The page is fully built underneath either way — the gate is
+   only an overlay, so nothing depends on the choice being made.
+   ------------------------------------------------------------ */
+var savedLang = null;
+try{ savedLang = localStorage.getItem(LANG_KEY); }catch(e){}
+
+setLang(savedLang === 'ar' ? 'ar' : 'en', true);
 
 /* render synchronously, before Firebase is even touched */
 buildCards();
 claims = loadLocal();
 paint();
 
+if(savedLang !== 'ar' && savedLang !== 'en'){
+  var gate = document.getElementById('gate');
+  gate.classList.add('show');
+  document.getElementById('gateAr').addEventListener('click', function(){
+    setLang('ar'); gate.classList.remove('show');
+  });
+  document.getElementById('gateEn').addEventListener('click', function(){
+    setLang('en'); gate.classList.remove('show');
+  });
+}
+
 /* ============================================================
-   5. FIREBASE — live shared state (never blocks the render)
+   6. FIREBASE — live shared state (never blocks the render)
    ============================================================ */
-function toast(msg, ok){
-  var t = document.getElementById('toast');
+function hideToast(){
+  document.getElementById('toast').classList.remove('show');
+}
+
+function toast(msg, ok, actionLabel, actionFn, ms){
+  var el  = document.getElementById('toast');
+  var act = document.getElementById('toastAction');
   document.getElementById('toastText').textContent = msg;
-  t.classList.toggle('ok', !!ok);
-  t.classList.add('show');
+  el.classList.toggle('ok', !!ok);
+
+  if(actionLabel){
+    act.textContent = actionLabel;
+    act.hidden = false;
+    act.onclick = function(){ hideToast(); actionFn(); };
+  }else{
+    act.hidden = true;
+    act.onclick = null;
+  }
+
+  el.classList.add('show');
   clearTimeout(toast._t);
-  toast._t = setTimeout(function(){ t.classList.remove('show'); }, 5200);
+  toast._t = setTimeout(function(){ el.classList.remove('show'); }, ms || 5200);
 }
 
 function initFirebase(){
@@ -1367,13 +1678,13 @@ function initFirebase(){
       liveSync = false;
       dbRef = null;
       paint();
-      toast('Live sync unavailable (' + err.code + ') — claims are saved on this device only.');
+      toast(t('syncErr', { code: err.code }));
     });
   }catch(e){
     dbRef = null;
     liveSync = false;
     paint();
-    toast('Live sync is off — claims are saved on this device only.');
+    toast(t('syncOff'));
   }
 }
 initFirebase();
@@ -1391,7 +1702,7 @@ function flashRemote(ids){
 }
 
 /* ============================================================
-   6. BOTTOM SHEET
+   7. BOTTOM SHEET
    ============================================================ */
 var backdrop     = document.getElementById('backdrop');
 var sheet        = document.getElementById('sheet');
@@ -1479,12 +1790,12 @@ nameInput.addEventListener('keydown', function(e){
 });
 
 /* ============================================================
-   7. CLAIM / RELEASE
+   8. CLAIM / RELEASE
    ============================================================ */
 document.getElementById('claimConfirm').addEventListener('click', function(){
   if(!pending || pending.mode !== 'claim') return;
   var id  = pending.id;
-  var who = (nameInput.value || '').trim().slice(0, 40) || DEFAULT_NAME;
+  var who = (nameInput.value || '').trim().slice(0, 40) || t('defaultName');
   var btn = document.getElementById('slot-' + id);
   myActions[id] = true;
   closeSheet();
@@ -1496,17 +1807,17 @@ document.getElementById('claimConfirm').addEventListener('click', function(){
       return { name: who, ts: Date.now() };
     }, function(err, committed, snap){
       if(err){
-        toast('Could not save that claim — please try again.');
+        toast(t('errClaim'));
         return;
       }
       if(!committed){
         var taken = snap && snap.val();
-        toast('Too late — ' + ((taken && taken.name) || 'someone else') + ' just claimed that one.');
+        toast(t('tooLate', { name: (taken && taken.name) || t('someoneElse') }));
         return;
       }
       celebrate(btn);
       buzz([12, 40, 18]);
-      toast('Thank you, ' + who + '!', true);
+      toast(t('thanks', { name: who }), true);
     });
   }else{
     claims[id] = { name: who, ts: Date.now() };
@@ -1519,23 +1830,77 @@ document.getElementById('claimConfirm').addEventListener('click', function(){
 
 document.getElementById('releaseConfirm').addEventListener('click', function(){
   if(!pending || pending.mode !== 'release') return;
-  var id = pending.id;
+  var id  = pending.id;
+  var rec = claims[id];                     // remember it, so Undo can put it back
   myActions[id] = true;
   closeSheet();
 
+  function offerUndo(){
+    toast(t('released'), true, t('undo'), function(){ undoRelease(id, rec); }, 5000);
+  }
+
   if(dbRef){
     dbRef.child(id).transaction(function(){ return null; }, function(err){
-      if(err) toast('Could not release that gift — please try again.');
+      if(err){ toast(t('errRelease')); return; }
+      offerUndo();
     });
   }else{
     delete claims[id];
     saveLocal();
     paint();
+    offerUndo();
   }
 });
 
+/* put a released gift back, but only if nobody grabbed it in the meantime */
+function undoRelease(id, rec){
+  if(!rec) return;
+  myActions[id] = true;
+
+  if(dbRef){
+    dbRef.child(id).transaction(function(current){
+      if(current) return;                   // someone else claimed it -> abort
+      return rec;
+    }, function(err, committed){
+      if(err){ toast(t('errClaim')); return; }
+      if(!committed){ toast(t('undoGone')); return; }
+      buzz(10);
+    });
+  }else{
+    claims[id] = rec;
+    saveLocal();
+    paint();
+    buzz(10);
+  }
+}
+
 /* ============================================================
-   8. RIPPLE + SPARKLES
+   9. SHARE + LANGUAGE
+   ============================================================ */
+document.getElementById('shareBtn').addEventListener('click', function(){
+  var url  = location.href.split('#')[0];
+  var data = { title: document.title, text: t('kicker').replace(/<[^>]*>/g, '').trim(), url: url };
+
+  if(navigator.share){
+    navigator.share(data).catch(function(){ /* user dismissed the sheet */ });
+    return;
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(function(){
+      toast(t('copied'), true);
+    }).catch(function(){ window.prompt(t('share'), url); });
+    return;
+  }
+  window.prompt(t('share'), url);
+});
+
+document.getElementById('langBtn').addEventListener('click', function(){
+  setLang(LANG === 'ar' ? 'en' : 'ar');
+  buzz(8);
+});
+
+/* ============================================================
+   10. RIPPLE + SPARKLES
    ============================================================ */
 document.addEventListener('pointerdown', function(e){
   var btn = e.target.closest ? e.target.closest('.claim, .btn-solid') : null;
@@ -1606,7 +1971,7 @@ function celebrate(anchor){
 }
 
 /* ============================================================
-   9. AMBIENT DECOR — bubbles + floating hero icons
+   11. AMBIENT DECOR — bubbles + floating hero icons
    ============================================================ */
 (function(){
   if(reduceMotion) return;
@@ -1629,8 +1994,10 @@ function celebrate(anchor){
     var s2 = document.createElement('span');
     s2.className = 'hero-icon';
     s2.textContent = ICONS[j];
-    s2.style.left = (6 + (j * 88 / ICONS.length) + Math.random() * 6).toFixed(1) + '%';
-    s2.style.top  = (12 + Math.random() * 62).toFixed(1) + '%';
+    s2.style.left = (5 + (j * 88 / ICONS.length) + Math.random() * 6).toFixed(1) + '%';
+    /* keep clear of the headline band in the middle — it sits on the
+       right in Arabic and the left in English, so avoid the band entirely */
+    s2.style.top  = (j % 2 ? (3 + Math.random() * 21) : (76 + Math.random() * 15)).toFixed(1) + '%';
     s2.style.fontSize = (18 + Math.random() * 16).toFixed(0) + 'px';
     s2.style.animationDuration = (7 + Math.random() * 7).toFixed(1) + 's';
     s2.style.animationDelay = (-Math.random() * 9).toFixed(1) + 's';
@@ -1639,7 +2006,7 @@ function celebrate(anchor){
 })();
 
 /* ============================================================
-   10. PANIC BUTTON
+   12. PANIC BUTTON
    ============================================================ */
 (function(){
   var p = document.getElementById('panicBtn');
